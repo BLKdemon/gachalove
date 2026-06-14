@@ -1,1 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunita Retro Gacha - Rarity Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --panel-color: #16213e;
+            --accent-pink: #ffffff;
+            --accent-cyan: #2de2e6;
+            --accent-yellow: #ffff00;
+            --border-pixel: 4px solid #000;
+            
+            /* Colores de Rareza */
+            --rarity-comun: #ffffff;
+            --rarity-rara: #2de2e6;
+            --rarity-legendaria: #ffff00;
+        }
 
+        * { box-sizing: border-box; image-rendering: pixelated; }
+
+        body {
+            background-color: var(--bg-color);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        .window {
+            background-color: var(--panel-color);
+            border: var(--border-pixel);
+            box-shadow: 8px 8px 0px #000;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        h1 { font-size: 14px; color: var(--accent-yellow); margin-bottom: 20px; line-height: 1.5; }
+        h2 { font-size: 12px; color: var(--accent-pink); margin-top: 20px; }
+        .stats { font-size: 8px; color: var(--accent-cyan); margin-bottom: 10px; }
+
+        /* MÁQUINA GACHA */
+        .gacha-machine {
+            width: 120px; height: 120px;
+            background: var(--accent-pink);
+            margin: 20px auto;
+            border: var(--border-pixel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: inset -6px -6px 0px rgba(0,0,0,0.2);
+        }
+
+        .shake { animation: shakeAnim 0.2s infinite; }
+        @keyframes shakeAnim {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* EFECTO FLASH LEGENDARIO */
+        .flash-legendary { animation: flashAnim 0.4s 3; }
+        @keyframes flashAnim {
+            0%, 100% { background-color: var(--panel-color); }
+            50% { background-color: #fff; }
+        }
+
+        .btn-arcade {
+            background: var(--accent-cyan);
+            border: var(--border-pixel);
+            box-shadow: 0 6px 0 #0892a5;
+            color: #000;
+            padding: 15px;
+            width: 100%;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-arcade:active { transform: translateY(4px); box-shadow: 0 2px 0 #0892a5; }
+        .btn-arcade:disabled { background: #555; box-shadow: 0 6px 0 #333; color: #888; cursor: not-allowed; }
+
+        .result-display {
+            margin-top: 20px;
+            border: 2px dashed var(--accent-cyan);
+            padding: 15px;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.6;
+            font-size: 8px;
+        }
+
+        /* TEXTOS DE RAREZA VIBRANTES */
+        .txt-comun { color: var(--rarity-comun); }
+        .txt-rara { color: var(--rarity-rara); text-shadow: 2px 2px 0px #0f3460; }
+        .txt-legendaria { color: var(--rarity-yellow); animation: pulseGold 0.5s infinite alternate; text-shadow: 2px 2px 0px #000; }
+        
+        @keyframes pulseGold {
+            0% { color: #ffe600; }
+            100% { color: #ff8000; }
+        }
+
+        /* ÁLBUM */
+        .album-container {
+            max-height: 250px;
+            overflow-y: scroll;
+            margin-top: 15px;
+            border-top: 4px solid #000;
+            padding-top: 10px;
+        }
+
+        .note-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 2px solid #000;
+            background: #0f3460;
+            font-size: 8px;
+            line-height: 1.4;
+        }
+
+        .locked { color: #555; background: #222; border-color: #333; }
+        .item-comun { border-color: #fff; color: #fff; }
+        .item-rara { border-color: var(--rarity-rara); color: var(--rarity-rara); }
+        .item-legendaria { border-color: #ffaa00; color: #ffaa00; font-weight: bold; }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--accent-pink); border: 2px solid #000; }
+    </style>
+</head>
+<body>
+
+    <div class="window" id="main-window">
+        <h1>LUNITA GACHA<br>RARITY EDITION</h1>
+        <div class="stats">FICHAS: <span id="chips-count">1</span>/1</div>
+        <div id="timer" style="font-size: 7px; color: #888;"></div>
+
+        <div class="gacha-machine" id="machine">
+         <img src="gatitos.jpg" alt="Gacha" style="width: 100%; height: 200%; object-fit: contain; padding: 10px;">
+        </div>
+
+        <button class="btn-arcade" id="pull-btn" onclick="pullGacha()">PULL (1 FICHA)</button>
+
+        <div class="result-display" id="result-text">
+            ¿LISTA PARA PROBAR TU SUERTE?
+        </div>
+    </div>
+
+    <div class="window">
+        <h2>COLECCION</h2>
+        <div class="stats" style="margin-top: 10px;">NOTAS: <span id="collected-count">0</span>/120</div>
+        <div class="album-container" id="album"></div>
+    </div>
+
+    <script>
+        const COOLDOWN_HOURS = 12;
+        const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000;
+
+        // BANCO DE FRASES CON RANGOS ASIGNADOS ('C'=Común, 'R'=Rara, 'L'=Legendaria)
+        // Puedes cambiar la letra y la frase a tu gusto para organizar las 120.
+        const allNotes = [
+            { tipo: 'C', texto: "¡TE AMO, LUNITA! ERES MI PENSAMIENTO FAVORITO. ❤️" },
+            { tipo: 'C', texto: "UN DIA MAS A TU LADO ES UN DIA PERFECTO. ✨" },
+            { tipo: 'C', texto: "ERES EL PIXEL MAS LINDO DE MI MUNDO. 👾" },
+            { tipo: 'R', texto: "⭐ RARA: TU SONRISA TIENE MAS POWER-UP QUE NINGUN ITEM. 🍄" },
+            { tipo: 'R', texto: "⭐ RARA: GRACIAS POR SER MI PLAYER 2 EN ESTA AVENTURA. 🎮" },
+            { tipo: 'C', texto: "ME ENCANTAS MAS HOY QUE AYER. 🥰" },
+            { tipo: 'L', texto: "👑 LEGENDARIA: TIRASTE DEL GACHA PERO TU YA GANASTE MI CORAZON PARA SIEMPRE. 🏆" },
+            { tipo: 'C', texto: "ERES MI REFUGIO SEGURO Y MI HOGAR. 🏡" },
+            { tipo: 'R', texto: "⭐ RARA: VALES MUCHISIMO MAS QUE UN HIGH SCORE COMPLETO. 💎" },
+            { tipo: 'L', texto: "👑 LEGENDARIA: EN EL CIELO ERES LUNITA, PERO EN MI ALMA ERES EL SOL QUE ME GUIA. 🌙☀️" }
+            // Sigue añadiendo objetos { tipo: 'C' o 'R' o 'L', texto: "..." } hasta llegar a 120
+        ];
+
+        let unlockedData = [];
+
+        window.onload = function() {
+            loadProgress();
+            updateUI();
+            setInterval(updateUI, 1000);
+        };
+
+        function loadProgress() {
+            const saved = localStorage.getItem('lunita_rarity_progress');
+            if (saved) {
+                unlockedData = JSON.parse(saved);
+                while(unlockedData.length < allNotes.length) unlockedData.push(false);
+            } else {
+                unlockedData = new Array(allNotes.length).fill(false);
+            }
+            renderAlbum();
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('pull-btn');
+            const timerTxt = document.getElementById('timer');
+            const countTxt = document.getElementById('chips-count');
+            const lastPull = localStorage.getItem('lunita_last_pull');
+
+            if (!lastPull) {
+                countTxt.innerText = "1";
+                timerTxt.innerText = "¡SISTEMA LISTO!";
+                btn.disabled = false;
+                return;
+            }
+
+            const now = new Date().getTime();
+            const elapsed = now - parseInt(lastPull);
+
+            if (elapsed >= COOLDOWN_MS) {
+                countTxt.innerText = "1";
+                timerTxt.innerText = "¡SISTEMA LISTO!";
+                btn.disabled = false;
+            } else {
+                countTxt.innerText = "0";
+                btn.disabled = true;
+                const remaining = COOLDOWN_MS - elapsed;
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                timerTxt.innerText = `RECARGA EN: ${h}H ${m}M ${s}S`;
+            }
+        }
+
+        function renderAlbum() {
+            const album = document.getElementById('album');
+            album.innerHTML = "";
+            let count = 0;
+
+            allNotes.forEach((item, i) => {
+                const div = document.createElement('div');
+                const isUnlocked = unlockedData[i];
+                
+                if (isUnlocked) {
+                    count++;
+                    if(item.tipo === 'C') div.className = "note-item item-comun";
+                    if(item.tipo === 'R') div.className = "note-item item-rara";
+                    if(item.tipo === 'L') div.className = "note-item item-legendaria";
+                    div.innerText = `${i+1}. ${item.texto}`;
+                } else {
+                    div.className = "note-item locked";
+                    div.innerText = `${i+1}. [BLOQUEADO 🔒]`;
+                }
+                album.appendChild(div);
+            });
+            document.getElementById('collected-count').innerText = count;
+        }
+
+        function pullGacha() {
+            const machine = document.getElementById('machine');
+            const resultTxt = document.getElementById('result-text');
+            const mainWindow = document.getElementById('main-window');
+            
+            machine.classList.add('shake');
+            resultTxt.className = "result-display";
+            resultTxt.innerText = "PROCESANDO CAPSULA...";
+
+            setTimeout(() => {
+                machine.classList.remove('shake');
+                
+                // Guardar tiempo de tiro
+                const now = new Date().getTime();
+                localStorage.setItem('lunita_last_pull', now);
+
+                // SISTEMA DE PROBABILIDADES MATEMÁTICAS (Gacha Roll)
+                const roll = Math.random() * 100; // Número entre 0 y 100
+                let rarezaElegida = 'C';
+
+                if (roll <= 5) {
+                    rarezaElegida = 'L'; // 5% Probabilidad
+                    mainWindow.classList.add('flash-legendary');
+                    setTimeout(() => mainWindow.classList.remove('flash-legendary'), 1200);
+                } else if (roll <= 30) {
+                    rarezaElegida = 'R'; // 25% Probabilidad (5 + 25 = 30)
+                } else {
+                    rarezaElegida = 'C'; // 70% Probabilidad
+                }
+
+                // Filtrar las frases del banco que correspondan a la rareza ganada
+                const opcionesFiltradas = [];
+                allNotes.forEach((note, index) => {
+                    if(note.tipo === rarezaElegida) {
+                        opcionesFiltradas.push({ nota: note, originalIndex: index });
+                    }
+                });
+
+                // Si por mala suerte no encuentra de ese tipo en tu lista, agarra cualquiera al azar
+                const seleccionada = opcionesFiltradas.length > 0 
+                    ? opcionesFiltradas[Math.floor(Math.random() * opcionesFiltradas.length)]
+                    : { nota: allNotes[Math.floor(Math.random() * allNotes.length)], originalIndex: 0 };
+
+                const finalIndex = seleccionada.originalIndex;
+                const finalNote = seleccionada.nota;
+
+                // Aplicar estilo de texto según la rareza en la pantalla
+                if(finalNote.tipo === 'C') resultTxt.classList.add('txt-comun');
+                if(finalNote.tipo === 'R') resultTxt.classList.add('txt-rara');
+                if(finalNote.tipo === 'L') resultTxt.classList.add('txt-legendaria');
+
+                // Verificar si ya existía en la colección
+                if (unlockedData[finalIndex]) {
+                    resultTxt.innerHTML = `<span>¡REPETIDA!</span><br><br>${finalNote.texto}`;
+                } else {
+                    unlockedData[finalIndex] = true;
+                    localStorage.setItem('lunita_rarity_progress', JSON.stringify(unlockedData));
+                    resultTxt.innerHTML = `<span>¡NUEVA NOTA DESBLOQUEADA!</span><br><br>${finalNote.texto}`;
+                }
+
+                updateUI();
+                renderAlbum();
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
