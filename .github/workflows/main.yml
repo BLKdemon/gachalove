@@ -21,14 +21,17 @@ jobs:
 
     - name: Create Cordova Project and Build
       run: |
-        cd ..
+       - name: Create Cordova Project and Build
+      run: |
+        # Vamos directo a la carpeta donde estan tus archivos
         cordova create tmp_project com.gachalove.app GachaLove
         cd tmp_project
         cordova platform add android@12.0.0
+        # Borramos la carpeta www basura y metemos la tuya
         rm -rf www
-        cp -r ../gachalove/www www
-        # Copiar config.xml si existe, si no, usa el por defecto
-        [ -f ../gachalove/config.xml ] && cp ../gachalove/config.xml config.xml || true
+        cp -r ../www .
+        # Copiar config.xml de la raíz
+        cp ../config.xml .
         cordova build android --device --release
 
     - name: Upload APK Artifact
