@@ -11,10 +11,16 @@ jobs:
     - name: Checkout source
       uses: actions/checkout@v4
 
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '16'
 
     - name: Install Cordova
       run: npm install -g cordova
@@ -23,13 +29,11 @@ jobs:
       run: |
         cordova create app_build com.gachalove.app GachaLove
         cd app_build
-        # Usamos una versión compatible
         cordova platform add android@12.0.0
-        # Limpiamos y metemos tus archivos
         rm -rf www
         cp -r ../www .
         [ -f ../config.xml ] && cp ../config.xml .
-        # Compilamos
+        # El comando clave para compilar sin errores de XmlParser
         cordova build android --release
 
     - name: Upload APK
