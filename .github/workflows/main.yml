@@ -14,28 +14,26 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
-        node-size: 16
+        node-version: '16'
 
     - name: Install Cordova
       run: npm install -g cordova
 
-    - name: Create Cordova Project and Build
+    - name: Create and Build
       run: |
-       - name: Create Cordova Project and Build
-      run: |
-        # Vamos directo a la carpeta donde estan tus archivos
-        cordova create tmp_project com.gachalove.app GachaLove
-        cd tmp_project
+        # Crear proyecto directamente aquí
+        cordova create app_build com.gachalove.app GachaLove
+        cd app_build
         cordova platform add android@12.0.0
-        # Borramos la carpeta www basura y metemos la tuya
+        # Mover tus archivos desde la raíz de GitHub a la carpeta del proyecto
         rm -rf www
         cp -r ../www .
-        # Copiar config.xml de la raíz
         cp ../config.xml .
-        cordova build android --device --release
+        # Construir
+        cordova build android --release
 
-    - name: Upload APK Artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v3
       with:
         name: GachaLove-APK
-        path: ../tmp_project/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        path: app_build/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
