@@ -1,0 +1,38 @@
+name: Build Android APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-size: 16
+
+    - name: Install Cordova
+      run: npm install -g cordova
+
+    - name: Create Cordova Project and Build
+      run: |
+        cd ..
+        cordova create tmp_project com.gachalove.app GachaLove
+        cd tmp_project
+        cordova platform add android@12.0.0
+        rm -rf www
+        cp -r ../gachalove/www www
+        # Copiar config.xml si existe, si no, usa el por defecto
+        [ -f ../gachalove/config.xml ] && cp ../gachalove/config.xml config.xml || true
+        cordova build android --device --release
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: GachaLove-APK
+        path: ../tmp_project/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
