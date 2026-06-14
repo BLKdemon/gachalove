@@ -20,20 +20,22 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '18'
 
     - name: Install Cordova
-      run: npm install -g cordova
+      run: npm install -g cordova@latest
 
     - name: Build Project
       run: |
+        # Crear un entorno limpio
         cordova create app_build com.gachalove.app GachaLove
         cd app_build
         cordova platform add android@12.0.0
+        # Mover los archivos del juego
         rm -rf www
         cp -r ../www .
         [ -f ../config.xml ] && cp ../config.xml .
-        # El comando clave para compilar sin errores de XmlParser
+        # Ejecutar build
         cordova build android --release
 
     - name: Upload APK
